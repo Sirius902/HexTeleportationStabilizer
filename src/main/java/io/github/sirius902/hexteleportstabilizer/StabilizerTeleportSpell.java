@@ -26,7 +26,7 @@ public class StabilizerTeleportSpell implements RenderedSpell {
 
     @Override
     public void cast(@NotNull CastingEnvironment env) {
-        if (teleportee instanceof ServerPlayer player && env.getCastingEntity() == player) {
+        if (teleportee instanceof ServerPlayer player) {
             var destination = teleportee.position().add(delta);
             var ambitRadius = player.getAttributeValue(HexAttributes.AMBIT_RADIUS);
 
