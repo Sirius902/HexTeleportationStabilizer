@@ -157,7 +157,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
     implementation("at.petra-k:paucal:0.7.2+1.21.1-neoforge")
-    implementation "at.petrak.hexcasting:hexcasting:0.0.5-alpha"
+    implementation "at.petrak.hexcasting:hexcasting:0.0.8-alpha"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
