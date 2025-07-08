@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:chorus_fruit"
+    },
+    "L": {
+      "item": "minecraft:lodestone"
+    },
+    "S": {
+      "item": "hexcasting:slate_block"
+    }
+  },
+  "pattern": [
+    "SCS",
+    "CLC",
+    "SCS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hex_teleport_stabilizer:teleport_stabilizer"
+  }
+}
