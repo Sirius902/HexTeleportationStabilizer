@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "hex_teleport_stabilizer:block/teleport_stabilizer_top",
+    "side": "hex_teleport_stabilizer:block/teleport_stabilizer_side_activated"
+  }
+}

@@ -5,6 +5,7 @@ import at.petrak.hexcasting.api.casting.eval.CastingEnvironment;
 import at.petrak.hexcasting.api.casting.eval.vm.CastingImage;
 import at.petrak.hexcasting.common.casting.actions.spells.great.OpTeleport;
 import at.petrak.hexcasting.common.lib.HexAttributes;
+import io.github.sirius902.hexteleportstabilizer.block.BlockTeleportStabilizer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -24,13 +25,12 @@ public class StabilizerTeleportSpell implements RenderedSpell {
     }
 
     @Override
-    public void cast(@NotNull CastingEnvironment castingEnvironment) {
-        var player = (ServerPlayer)teleportee;
-        if (player != null && castingEnvironment.getCastingEntity() == player) {
+    public void cast(@NotNull CastingEnvironment env) {
+        if (teleportee instanceof ServerPlayer player && env.getCastingEntity() == player) {
             var destination = teleportee.position().add(delta);
             var ambitRadius = player.getAttributeValue(HexAttributes.AMBIT_RADIUS);
 
-            var world = castingEnvironment.getWorld();
+            var world = env.getWorld();
             var searchRadius = (int)Math.ceil(ambitRadius);
             for (var dz = -searchRadius; dz < searchRadius; dz++) {
                 for (var dy = -searchRadius; dy < searchRadius; dy++) {
@@ -39,11 +39,13 @@ public class StabilizerTeleportSpell implements RenderedSpell {
                         var y = (int)Math.floor(destination.y()) + dy;
                         var z = (int)Math.floor(destination.z()) + dz;
 
-                        var block = world.getBlockState(new BlockPos(x, y, z));
+                        var blockPos = new BlockPos(x, y, z);
+                        var block = world.getBlockState(blockPos);
                         var dist = destination.distanceToSqr(x, y, z);
 
-                        if (dist <= ambitRadius * ambitRadius + 0.00000000001 && block.getBlock() == StabilizerMod.BLOCK_TELEPORT_STABILIZER.get()) {
+                        if (dist <= ambitRadius * ambitRadius + 0.00000000001 && block.getBlock() instanceof BlockTeleportStabilizer stabilizer) {
                             OpTeleport.INSTANCE.teleportRespectSticky(teleportee, delta, world);
+                            stabilizer.activate(world, blockPos, env);
                             return;
                         }
                     }
@@ -51,13 +53,13 @@ public class StabilizerTeleportSpell implements RenderedSpell {
             }
         }
 
-        this.originalTeleport.cast(castingEnvironment);
+        this.originalTeleport.cast(env);
     }
 
     // FUTURE(Sirius902) If OpTeleport Spell actually overrides this it will have to be changed.
     @Override
-    public @Nullable CastingImage cast(@NotNull CastingEnvironment castingEnvironment, @NotNull CastingImage castingImage) {
-        cast(castingEnvironment);
+    public @Nullable CastingImage cast(@NotNull CastingEnvironment env, @NotNull CastingImage image) {
+        cast(env);
         return null;
     }
 }

@@ -1,5 +1,6 @@
 package io.github.sirius902.hexteleportstabilizer;
 
+import io.github.sirius902.hexteleportstabilizer.block.BlockTeleportStabilizer;
 import io.github.sirius902.hexteleportstabilizer.datagen.StabilizerDataGenerators;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -30,7 +31,7 @@ public class StabilizerMod {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
 
-    public static final DeferredBlock<Block> BLOCK_TELEPORT_STABILIZER = BLOCKS.registerSimpleBlock("teleport_stabilizer", slateish().strength(2f, 4f));
+    public static final DeferredBlock<Block> BLOCK_TELEPORT_STABILIZER = BLOCKS.registerBlock("teleport_stabilizer", BlockTeleportStabilizer::new, slateish().strength(3.5f, 4f));
     public static final DeferredItem<BlockItem> ITEM_TELEPORT_STABILIZER = ITEMS.registerSimpleBlockItem("teleport_stabilizer", BLOCK_TELEPORT_STABILIZER, new Item.Properties());
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HEX_TELEPORT_STABILIZER_TAB = CREATIVE_MODE_TABS.register("hex_teleport_stabilizer_tab", () -> CreativeModeTab.builder()

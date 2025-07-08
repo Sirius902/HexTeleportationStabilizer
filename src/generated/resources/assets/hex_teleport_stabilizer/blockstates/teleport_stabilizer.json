@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
-      "model": "minecraft:block/lodestone"
+    "activated=false": {
+      "model": "hex_teleport_stabilizer:block/teleport_stabilizer"
+    },
+    "activated=true": {
+      "model": "hex_teleport_stabilizer:block/teleport_stabilizer_activated"
     }
   }
 }
