@@ -8,10 +8,14 @@ import at.petrak.hexcasting.common.lib.HexAttributes;
 import io.github.sirius902.hexteleportstabilizer.block.BlockTeleportStabilizer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class StabilizerTeleportSpell implements RenderedSpell {
     private final Entity teleportee;
@@ -30,7 +34,7 @@ public class StabilizerTeleportSpell implements RenderedSpell {
             var destination = player.position().add(delta);
             var ambitRadius = player.getAttributeValue(HexAttributes.AMBIT_RADIUS);
 
-            var world = env.getWorld();
+            var stabilizers = new ArrayList<Tuple<BlockPos, BlockTeleportStabilizer>>();
             var searchRadius = (int)Math.ceil(ambitRadius);
             for (var dz = -searchRadius; dz < searchRadius; dz++) {
                 for (var dy = -searchRadius; dy < searchRadius; dy++) {
@@ -40,16 +44,25 @@ public class StabilizerTeleportSpell implements RenderedSpell {
                         var z = (int)Math.floor(destination.z()) + dz;
 
                         var blockPos = new BlockPos(x, y, z);
-                        var block = world.getBlockState(blockPos);
+                        var block = env.getWorld().getBlockState(blockPos);
                         var dist = destination.distanceToSqr(x, y, z);
 
                         if (dist <= ambitRadius * ambitRadius + 0.00000000001 && block.getBlock() instanceof BlockTeleportStabilizer stabilizer) {
-                            OpTeleport.INSTANCE.teleportRespectSticky(player, delta, world);
-                            stabilizer.activate(world, blockPos, env);
-                            return;
+                            stabilizers.add(new Tuple<>(blockPos, stabilizer));
                         }
                     }
                 }
+            }
+
+            if (!stabilizers.isEmpty()) {
+                var selected = stabilizers.get(env.getWorld().getRandom().nextInt(stabilizers.size()));
+                var blockPos = selected.getA();
+                var stabilizer = selected.getB();
+
+                var world = env.getWorld();
+                OpTeleport.INSTANCE.teleportRespectSticky(player, delta, world);
+                stabilizer.activate(world, blockPos, env);
+                return;
             }
         }
 
