@@ -61,7 +61,7 @@ public class StabilizerTeleportSpell implements RenderedSpell {
 
                 var world = env.getWorld();
                 OpTeleport.INSTANCE.teleportRespectSticky(player, delta, world);
-                stabilizer.activate(world, blockPos, env);
+                stabilizer.activate(world, player, blockPos, env);
                 return;
             }
         }

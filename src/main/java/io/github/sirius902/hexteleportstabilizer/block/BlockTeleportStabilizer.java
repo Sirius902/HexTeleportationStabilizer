@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -18,28 +19,48 @@ import java.util.List;
 public class BlockTeleportStabilizer extends Block {
     public static final BooleanProperty ACTIVATED = BooleanProperty.create("activated");
 
-    private static final List<Vec3> PARTICLE_OFFSETS = List.of(
+    private static final List<Vec3> FACE_OFFSETS = List.of(
         new Vec3(-0.5, 0.0, 0.0),
         new Vec3(0.5, 0.0, 0.0),
         new Vec3(0.0, 0.0, -0.5),
         new Vec3(0.0, 0.0, 0.5)
     );
 
+    private static void makeParticleLine(Vec3 from, Vec3 to, CastingEnvironment env) {
+        var count = 2 * (int)Math.round(from.distanceTo(to));
+        for (var i = 0; i < count; i++) {
+            var delta = (double)i / count;
+            var pos = from.lerp(to, delta);
+            ParticleSpray.cloud(pos, 0.5, 10).sprayParticles(env.getWorld(), env.getPigment());
+        }
+    }
+
     public BlockTeleportStabilizer(Properties properties) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(ACTIVATED, false));
     }
 
-    public void activate(ServerLevel world, BlockPos pos, CastingEnvironment env) {
+    public void activate(ServerLevel world, Entity teleportee, BlockPos pos, CastingEnvironment env) {
         world.setBlockAndUpdate(pos, world.getBlockState(pos)
             .setValue(BlockTeleportStabilizer.ACTIVATED, true));
 
-        assert HexEvalSounds.NORMAL_EXECUTE.sound() != null;
+        var teleporteeCenterPos = teleportee.getPosition(0f).add(0.0, 0.5 * teleportee.getBbHeight(), 0.0);
+        Vec3 closestFacePos = null;
 
+        assert HexEvalSounds.NORMAL_EXECUTE.sound() != null;
         world.playSound(null, pos, HexEvalSounds.NORMAL_EXECUTE.sound(), SoundSource.BLOCKS, 1f, 1f);
-        for (var offset : PARTICLE_OFFSETS) {
-            ParticleSpray.burst(pos.getCenter().add(offset), 1.0, 20).sprayParticles(world, env.getPigment());
+        for (var offset : FACE_OFFSETS) {
+            var offsetPos = pos.getCenter().add(offset);
+
+            if (closestFacePos == null || offsetPos.distanceToSqr(teleporteeCenterPos) <= closestFacePos.distanceToSqr(teleporteeCenterPos)) {
+                closestFacePos = offsetPos;
+            }
+
+            ParticleSpray.burst(offsetPos, 1.0, 20).sprayParticles(world, env.getPigment());
         }
+
+        assert closestFacePos != null;
+        makeParticleLine(closestFacePos, teleporteeCenterPos, env);
 
         world.scheduleTick(pos, this, 20);
     }
