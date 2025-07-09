@@ -27,7 +27,7 @@ public class StabilizerTeleportSpell implements RenderedSpell {
     @Override
     public void cast(@NotNull CastingEnvironment env) {
         if (teleportee instanceof ServerPlayer player) {
-            var destination = teleportee.position().add(delta);
+            var destination = player.position().add(delta);
             var ambitRadius = player.getAttributeValue(HexAttributes.AMBIT_RADIUS);
 
             var world = env.getWorld();
@@ -44,7 +44,7 @@ public class StabilizerTeleportSpell implements RenderedSpell {
                         var dist = destination.distanceToSqr(x, y, z);
 
                         if (dist <= ambitRadius * ambitRadius + 0.00000000001 && block.getBlock() instanceof BlockTeleportStabilizer stabilizer) {
-                            OpTeleport.INSTANCE.teleportRespectSticky(teleportee, delta, world);
+                            OpTeleport.INSTANCE.teleportRespectSticky(player, delta, world);
                             stabilizer.activate(world, blockPos, env);
                             return;
                         }
