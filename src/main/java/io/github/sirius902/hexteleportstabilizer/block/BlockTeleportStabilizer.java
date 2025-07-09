@@ -48,7 +48,7 @@ public class BlockTeleportStabilizer extends Block {
         world.playSound(null, pos, HexEvalSounds.NORMAL_EXECUTE.sound(), SoundSource.BLOCKS, 1f, 1f);
 
         var posCenter = pos.getCenter();
-        var teleporteeCenterPos = teleportee.getPosition(0f).add(0.0, 0.5 * teleportee.getBbHeight(), 0.0);
+        var teleporteeCenterPos = teleportee.position().add(0.0, 0.5 * teleportee.getBbHeight(), 0.0);
         Vec3 closestExposedFace = null;
         for (var offset : PARTICLE_FACE_OFFSETS) {
             var offsetPos = posCenter.add(offset);
