@@ -36,7 +36,7 @@ public class BlockTeleportStabilizer extends Block {
 
         assert HexEvalSounds.NORMAL_EXECUTE.sound() != null;
 
-        world.playSound(null, pos, HexEvalSounds.NORMAL_EXECUTE.sound(), SoundSource.BLOCKS, 3f, 1f);
+        world.playSound(null, pos, HexEvalSounds.NORMAL_EXECUTE.sound(), SoundSource.BLOCKS, 1f, 1f);
         for (var offset : PARTICLE_OFFSETS) {
             ParticleSpray.burst(pos.getCenter().add(offset), 1.0, 20).sprayParticles(world, env.getPigment());
         }
