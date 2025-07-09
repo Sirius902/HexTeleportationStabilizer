@@ -19,7 +19,7 @@ import java.util.List;
 public class BlockTeleportStabilizer extends Block {
     public static final BooleanProperty ACTIVATED = BooleanProperty.create("activated");
 
-    private static final List<Vec3> FACE_OFFSETS = List.of(
+    private static final List<Vec3> PARTICLE_FACE_OFFSETS = List.of(
         new Vec3(-0.5, 0.0, 0.0),
         new Vec3(0.5, 0.0, 0.0),
         new Vec3(0.0, 0.0, -0.5),
@@ -44,23 +44,25 @@ public class BlockTeleportStabilizer extends Block {
         world.setBlockAndUpdate(pos, world.getBlockState(pos)
             .setValue(BlockTeleportStabilizer.ACTIVATED, true));
 
-        var teleporteeCenterPos = teleportee.getPosition(0f).add(0.0, 0.5 * teleportee.getBbHeight(), 0.0);
-        Vec3 closestFacePos = null;
-
         assert HexEvalSounds.NORMAL_EXECUTE.sound() != null;
         world.playSound(null, pos, HexEvalSounds.NORMAL_EXECUTE.sound(), SoundSource.BLOCKS, 1f, 1f);
-        for (var offset : FACE_OFFSETS) {
-            var offsetPos = pos.getCenter().add(offset);
 
-            if (closestFacePos == null || offsetPos.distanceToSqr(teleporteeCenterPos) <= closestFacePos.distanceToSqr(teleporteeCenterPos)) {
-                closestFacePos = offsetPos;
+        var posCenter = pos.getCenter();
+        var teleporteeCenterPos = teleportee.getPosition(0f).add(0.0, 0.5 * teleportee.getBbHeight(), 0.0);
+        Vec3 closestExposedFace = null;
+        for (var offset : PARTICLE_FACE_OFFSETS) {
+            var offsetPos = posCenter.add(offset);
+            var neighborPos = BlockPos.containing(posCenter.add(offset.scale(2)));
+            var neighborState = world.getBlockState(neighborPos);
+
+            if (!neighborState.isSolidRender(world, neighborPos) && (closestExposedFace == null || offsetPos.distanceToSqr(teleporteeCenterPos) <= closestExposedFace.distanceToSqr(teleporteeCenterPos))) {
+                closestExposedFace = offsetPos;
             }
 
             ParticleSpray.burst(offsetPos, 1.0, 20).sprayParticles(world, env.getPigment());
         }
 
-        assert closestFacePos != null;
-        makeParticleLine(closestFacePos, teleporteeCenterPos, env);
+        makeParticleLine(closestExposedFace != null ? closestExposedFace : posCenter, teleporteeCenterPos, env);
 
         world.scheduleTick(pos, this, 20);
     }
