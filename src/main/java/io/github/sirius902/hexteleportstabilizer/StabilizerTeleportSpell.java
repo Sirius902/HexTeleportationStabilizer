@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class StabilizerTeleportSpell implements RenderedSpell {
     private final Entity teleportee;
@@ -34,7 +33,8 @@ public class StabilizerTeleportSpell implements RenderedSpell {
             var destination = player.position().add(delta);
             var ambitRadius = player.getAttributeValue(HexAttributes.AMBIT_RADIUS);
 
-            var stabilizers = new ArrayList<Tuple<BlockPos, BlockTeleportStabilizer>>();
+            var activeStabilizers = new ArrayList<Tuple<BlockPos, BlockTeleportStabilizer>>();
+            var inactiveStabilizers = new ArrayList<Tuple<BlockPos, BlockTeleportStabilizer>>();
             var searchRadius = (int)Math.ceil(ambitRadius);
             for (var dz = -searchRadius; dz < searchRadius; dz++) {
                 for (var dy = -searchRadius; dy < searchRadius; dy++) {
@@ -48,14 +48,21 @@ public class StabilizerTeleportSpell implements RenderedSpell {
                         var dist = destination.distanceToSqr(x, y, z);
 
                         if (dist <= ambitRadius * ambitRadius + 0.00000000001 && block.getBlock() instanceof BlockTeleportStabilizer stabilizer) {
-                            stabilizers.add(new Tuple<>(blockPos, stabilizer));
+                            if (block.getValue(BlockTeleportStabilizer.ACTIVATED)) {
+                                activeStabilizers.add(new Tuple<>(blockPos, stabilizer));
+                            } else {
+                                inactiveStabilizers.add(new Tuple<>(blockPos, stabilizer));
+                            }
                         }
                     }
                 }
             }
 
-            if (!stabilizers.isEmpty()) {
-                var selected = stabilizers.get(env.getWorld().getRandom().nextInt(stabilizers.size()));
+            if (!activeStabilizers.isEmpty() || !inactiveStabilizers.isEmpty()) {
+                var selected = inactiveStabilizers.isEmpty() ?
+                    activeStabilizers.get(env.getWorld().getRandom().nextInt(activeStabilizers.size())) :
+                    inactiveStabilizers.get(env.getWorld().getRandom().nextInt(inactiveStabilizers.size()));
+
                 var blockPos = selected.getA();
                 var stabilizer = selected.getB();
 
